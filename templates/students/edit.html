@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Estudiante{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-5">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Datos del Estudiante</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3 text-center">
+                        {% if student.photo %}
+                        <img id="preview" src="{{ url_for('static', filename='uploads/' + student.photo) }}" 
+                             class="img-thumbnail mb-3" width="200" height="200" alt="Foto actual">
+                        {% else %}
+                        <img id="preview" src="{{ url_for('static', filename='avatars/default.png') }}" 
+                             class="img-thumbnail mb-3" width="200" height="200" alt="Foto por defecto">
+                        {% endif %}
+                        <input class="form-control" type="file" id="photo" name="photo" accept="image/*">
+                        <div class="form-text">Dejar en blanco para mantener la imagen actual</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               value="{{ student.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="student_code" class="form-label">Código de Estudiante</label>
+                        <input type="text" class="form-control" id="student_code" name="student_code" 
+                               value="{{ student.student_code }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               value="{{ student.email }}" required>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-7">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Materias Inscritas (Total créditos: {{ total_credits }}/20)</h4>
+            </div>
+            <div class="card-body">
+                {% if enrollments %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Materia</th>
+                                <th>Créditos</th>
+                                <th>Horario</th>
+                                <th>Profesor</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for enrollment in enrollments %}
+                            <tr>
+                                <td>{{ enrollment.subject.name }}</td>
+                                <td>{{ enrollment.subject.credits }}</td>
+                                <td>{{ enrollment.subject.schedule }}</td>
+                                <td>
+                                    {% if enrollment.subject.teacher %}
+                                        {{ enrollment.subject.teacher.name }}
+                                    {% else %}
+                                        <span class="badge bg-warning">Sin asignar</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger"
+                                            onclick="confirmDelete('{{ url_for('unenroll_student', student_id=student._id, subject_id=enrollment.subject._id) }}', 
+                                                     '¿Estás seguro de retirar esta materia?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-0">El estudiante no está inscrito en ninguna materia</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if available_subjects %}
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">Materias Disponibles</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Materia</th>
+                                <th>Créditos</th>
+                                <th>Horario</th>
+                                <th>Cupos</th>
+                                <th>Profesor</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in available_subjects %}
+                            <tr>
+                                <td>{{ subject.name }}</td>
+                                <td>{{ subject.credits }}</td>
+                                <td>{{ subject.schedule }}</td>
+                                <td>
+                                    <span class="badge bg-{% if subject.available_slots > 0 %}success{% else %}danger{% endif %}">
+                                        {{ subject.available_slots }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if subject.teacher %}
+                                        {{ subject.teacher.name }}
+                                    {% else %}
+                                        <span class="badge bg-warning">Sin asignar</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if total_credits + subject.credits <= 20 %}
+                                    <a href="{{ url_for('enroll_student', student_id=student._id, subject_id=subject._id) }}" 
+                                       class="btn btn-sm btn-success" title="Inscribir">
+                                        <i class="bi bi-plus-circle"></i>
+                                    </a>
+                                    {% else %}
+                                    <span class="badge bg-danger">Límite créditos</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Preview image before upload
+    document.getElementById('photo').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

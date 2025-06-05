@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Materias{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Lista de Materias</h1>
+    <a href="{{ url_for('add_subject') }}" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Agregar Materia
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Horario</th>
+                <th>Créditos</th>
+                <th>Grupo</th>
+                <th>Carrera</th>
+                <th>Profesor</th>
+                <th>Cupos</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subject in subjects %}
+            <tr>
+                <td>{{ subject.name }}</td>
+                <td>{{ subject.schedule }}</td>
+                <td>{{ subject.credits }}</td>
+                <td>{{ subject.group }}</td>
+                <td>{{ subject.career }}</td>
+                <td>
+                    {% if subject.teacher %}
+                        {{ subject.teacher.name }}
+                    {% else %}
+                        <span class="badge bg-warning">Sin asignar</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge bg-{% if subject.get('available_slots', 0) > 0 %}success{% else %}danger{% endif %}">
+                        {{ subject.get('available_slots', 0) }}/{{ subject.get('total_slots', 0) }}
+                    </span>
+                </td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <a href="{{ url_for('edit_subject', subject_id=subject._id) }}" 
+                           class="btn btn-primary" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <button class="btn btn-danger" title="Eliminar"
+                                onclick="confirmDelete('{{ url_for('delete_subject', subject_id=subject._id) }}', '¿Estás seguro de eliminar esta materia?')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No hay materias registradas</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

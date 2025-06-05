@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1>Reportes y Estadísticas</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Materias por Carrera</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="careerChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Estudiantes por Créditos</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="creditsChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Cupos Disponibles por Materia</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="slotsChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="display: none;">
+    <p>Subjects by career: {{ subjects_by_career|tojson }}</p>
+    <p>Students by credits: {{ students_by_credits|tojson }}</p>
+    <p>Subjects by slots: {{ subjects_by_slots|tojson }}</p>
+</div>
+
+{% block extra_js %}
+<script>
+    // Career Chart
+    const careerCtx = document.getElementById('careerChart').getContext('2d');
+    new Chart(careerCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ subjects_by_career|map(attribute='_id')|list|tojson }},
+            datasets: [{
+                label: 'Materias por Carrera',
+                data: {{ subjects_by_career|map(attribute='count')|list|tojson }},
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+    
+    // Credits Chart
+    const creditsCtx = document.getElementById('creditsChart').getContext('2d');
+    new Chart(creditsCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ students_by_credits|map(attribute='_id')|list|tojson }},
+            datasets: [{
+                label: 'Estudiantes por Créditos',
+                data: {{ students_by_credits|map(attribute='count')|list|tojson }},
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(255, 99, 132, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+    
+    // Slots Chart
+    const slotsCtx = document.getElementById('slotsChart').getContext('2d');
+    new Chart(slotsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ subjects_by_slots|map(attribute='_id')|list|tojson }},
+            datasets: [{
+                label: 'Cupos Disponibles',
+                data: {{ subjects_by_slots|map(attribute='count')|list|tojson }},
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

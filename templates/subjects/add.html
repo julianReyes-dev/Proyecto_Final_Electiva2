@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Agregar Materia{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Agregar Nueva Materia</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="schedule" class="form-label">Horario</label>
+                                <input type="text" class="form-control" id="schedule" name="schedule" 
+                                       placeholder="Ej: Lunes 8:00-10:00" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="credits" class="form-label">Créditos</label>
+                                <select class="form-select" id="credits" name="credits" required>
+                                    <option value="3">3 créditos</option>
+                                    <option value="4">4 créditos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="group" class="form-label">Grupo</label>
+                                <input type="text" class="form-control" id="group" name="group" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="career" class="form-label">Carrera</label>
+                                <select class="form-select" id="career" name="career" required>
+                                    <option value="">Seleccione una carrera...</option>
+                                    {% for career in careers %}
+                                    <option value="{{ career }}">{{ career }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="total_slots" class="form-label">Cupos Totales</label>
+                                <input type="number" class="form-control" id="total_slots" name="total_slots" 
+                                       min="1" value="30" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="teacher" class="form-label">Profesor</label>
+                        <select class="form-select" id="teacher" name="teacher">
+                            <option value="">Seleccione un profesor...</option>
+                            {% for teacher in teachers %}
+                            <option value="{{ teacher._id }}">{{ teacher.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('show_subjects') }}" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Guardar Materia
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

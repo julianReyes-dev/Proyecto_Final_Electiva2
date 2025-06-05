@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Importar Estudiantes{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Importar Estudiantes desde JSON</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Archivo JSON</label>
+                        <input class="form-control" type="file" id="file" name="file" accept=".json" required>
+                        <div class="form-text">Seleccione un archivo JSON con los datos de los estudiantes</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Ejemplo de formato:</h5>
+                        <pre class="bg-light p-3 rounded">
+[
+    {
+        "name": "Carlos López",
+        "student_code": "20230001",
+        "email": "carlos@example.com",
+        "photo": "carlos.jpg"  // Opcional
+    },
+    {
+        "name": "Ana Martínez",
+        "student_code": "20230002",
+        "email": "ana@example.com"
+    }
+]</pre>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('show_students') }}" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload"></i> Importar Estudiantes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

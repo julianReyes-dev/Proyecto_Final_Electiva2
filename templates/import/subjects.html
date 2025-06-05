@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Importar Materias{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Importar Materias desde JSON</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Archivo JSON</label>
+                        <input class="form-control" type="file" id="file" name="file" accept=".json" required>
+                        <div class="form-text">Seleccione un archivo JSON con los datos de las materias</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Ejemplo de formato:</h5>
+                        <pre class="bg-light p-3 rounded">
+[
+    {
+        "name": "Matemáticas Avanzadas",
+        "schedule": "Lunes y Miércoles 8:00-10:00",
+        "credits": 4,
+        "group": "A",
+        "career": "Ingeniería",
+        "total_slots": 30,
+        "teacher_email": "juan@example.com"  // Opcional
+    },
+    {
+        "name": "Física Cuántica",
+        "schedule": "Martes y Jueves 10:00-12:00",
+        "credits": 3,
+        "group": "B",
+        "career": "Física",
+        "total_slots": 25
+    }
+]</pre>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('show_subjects') }}" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload"></i> Importar Materias
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

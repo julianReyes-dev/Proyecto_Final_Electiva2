@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Profesor{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Editar Profesor: {{ teacher.name }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nombre Completo</label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ teacher.name }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="age" class="form-label">Edad</label>
+                                <input type="number" class="form-control" id="age" name="age" 
+                                       value="{{ teacher.age }}" min="18" max="100" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{{ teacher.email }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="photo" class="form-label">Fotografía</label>
+                                <input class="form-control" type="file" id="photo" name="photo" accept="image/*">
+                                <div class="form-text">Dejar en blanco para mantener la imagen actual</div>
+                            </div>
+                            <div class="text-center">
+                                {% if teacher.photo %}
+                                <img id="preview" src="{{ url_for('static', filename='uploads/' + teacher.photo) }}" 
+                                     class="img-thumbnail" width="150" height="150" alt="Foto actual">
+                                {% else %}
+                                <img id="preview" src="{{ url_for('static', filename='avatars/default.png') }}" 
+                                     class="img-thumbnail" width="150" height="150" alt="Foto por defecto">
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Materias que imparte</label>
+                        <select class="form-select" multiple name="subjects">
+                            {% for subject in subjects %}
+                            <option value="{{ subject }}" 
+                                    {% if subject in teacher.subjects %}selected{% endif %}>
+                                {{ subject }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Títulos académicos</label>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="bachelor" 
+                                           name="titles" value="bachelor"
+                                           {% if 'bachelor' in teacher.titles %}checked{% endif %}>
+                                    <label class="form-check-label" for="bachelor">Licenciatura</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="master" 
+                                           name="titles" value="master"
+                                           {% if 'master' in teacher.titles %}checked{% endif %}>
+                                    <label class="form-check-label" for="master">Maestría</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="phd" 
+                                           name="titles" value="phd"
+                                           {% if 'phd' in teacher.titles %}checked{% endif %}>
+                                    <label class="form-check-label" for="phd">Doctorado</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="professor" 
+                                           name="titles" value="professor"
+                                           {% if 'professor' in teacher.titles %}checked{% endif %}>
+                                    <label class="form-check-label" for="professor">Profesor</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('show_teachers') }}" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Preview image before upload
+    document.getElementById('photo').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

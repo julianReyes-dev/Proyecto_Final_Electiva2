@@ -41,7 +41,11 @@
                 <td>
                     {% if teacher.subjects %}
                         {% for subject in teacher.subjects[:3] %}
-                            <span class="badge bg-primary">{{ subject }}</span>
+                            <span class="badge bg-primary" 
+                                data-bs-toggle="tooltip" 
+                                title="{{ subject.career }} - Grupo {{ subject.group }}">
+                                {{ subject.name }}
+                            </span>
                         {% endfor %}
                         {% if teacher.subjects|length > 3 %}
                             <span class="badge bg-secondary">+{{ teacher.subjects|length - 3 }}</span>
@@ -80,7 +84,6 @@
         </tbody>
     </table>
 </div>
-
 {% block scripts %}
 <script>
     function confirmDelete(url, message) {
@@ -88,6 +91,13 @@
             window.location.href = url;
         }
     }
+    // Activar tooltips de Bootstrap
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
 </script>
 {% endblock %}
 {% endblock %}

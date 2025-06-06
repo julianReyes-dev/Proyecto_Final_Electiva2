@@ -84,40 +84,4 @@
         </div>
     </div>
 </div>
-
-<div class="card">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">Sesiones Activas ({{ sessions|length }})</h5>
-    </div>
-    <div class="card-body">
-        {% if sessions %}
-        <div class="table-responsive">
-            <table class="table table-sm">
-                <thead>
-                    <tr>
-                        <th>OpID</th>
-                        <th>Tipo</th>
-                        <th>Namespace</th>
-                        <th>Tiempo</th>
-                        <th>Cliente</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for session in sessions %}
-                    <tr>
-                        <td>{{ session.opid }}</td>
-                        <td>{{ session.op }}</td>
-                        <td>{{ session.ns|default('N/A', true) }}</td>
-                        <td>{{ session.secs_running }}s</td>
-                        <td>{{ session.client|default('N/A', true) }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="alert alert-info">No se encontraron sesiones activas</div>
-        {% endif %}
-    </div>
-</div>
 {% endblock %}

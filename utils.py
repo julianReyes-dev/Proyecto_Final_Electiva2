@@ -5,6 +5,7 @@ import random
 import string
 from io import BytesIO
 import base64
+from datetime import datetime
 
 def allowed_file(filename, extensions=None):
     if extensions is None:
@@ -12,28 +13,21 @@ def allowed_file(filename, extensions=None):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in extensions
 
-def save_uploaded_file(file, upload_folder):
+def save_uploaded_file(file, upload_folder=None):
+    if upload_folder is None:
+        upload_folder = current_app.config['UPLOAD_FOLDER']
+    
     if not os.path.exists(upload_folder):
         os.makedirs(upload_folder)
     
-    # Generate a random filename to prevent conflicts
-    random_str = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+    # Generar un nombre de archivo seguro y único
     filename = secure_filename(file.filename)
-    filename = f"{random_str}_{filename}"
+    unique_filename = f"{datetime.now().timestamp()}_{filename}"
     
-    filepath = os.path.join(upload_folder, filename)
+    filepath = os.path.join(upload_folder, unique_filename)
     file.save(filepath)
     
-    # Resize image if needed
-    try:
-        img = Image.open(filepath)
-        if img.size[0] > 500 or img.size[1] > 500:
-            img.thumbnail((500, 500))
-            img.save(filepath)
-    except Exception as e:
-        print(f"Error processing image: {str(e)}")
-    
-    return filename
+    return unique_filename
 
 def generate_avatar(name, size=200):
     # Create a simple avatar with initials

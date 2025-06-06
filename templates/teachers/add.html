@@ -43,10 +43,11 @@
                         <label class="form-label">Materias que imparte</label>
                         <select class="form-select" multiple name="subjects">
                             {% for subject in subjects %}
-                            <option value="{{ subject }}">{{ subject }}</option>
+                            <option value="{{ subject._id|string }}">{{ subject.name }}</option>
+                            <!-- Usamos |string para convertir ObjectId a string -->
                             {% endfor %}
                         </select>
-                        <div class="form-text">Mantén presionada la tecla Ctrl para seleccionar múltiples materias</div>
+                        <div class="form-text">Mantén presionado Ctrl para seleccionar múltiples materias</div>
                     </div>
                     
                     <div class="mb-3">

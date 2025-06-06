@@ -87,8 +87,37 @@ def dashboard():
         'enrollments': enrollments_col.count_documents({})
     }
     
-    # Get recent activities
-    recent_teachers = list(teachers_col.find().sort('_id', -1).limit(5))
+    # Get recent activities con el conteo de materias
+    recent_teachers = list(teachers_col.aggregate([
+        {
+            '$lookup': {
+                'from': 'subjects',
+                'localField': 'subject_ids',
+                'foreignField': '_id',
+                'as': 'subjects'
+            }
+        },
+        {
+            '$addFields': {
+                'subject_count': {'$size': '$subjects'}
+            }
+        },
+        {
+            '$sort': {'_id': -1}
+        },
+        {
+            '$limit': 5
+        },
+        {
+            '$project': {
+                'name': 1,
+                'email': 1,
+                'created_at': 1,
+                'subject_count': 1
+            }
+        }
+    ]))
+    
     recent_students = list(students_col.find().sort('_id', -1).limit(5))
     recent_subjects = list(subjects_col.find().sort('_id', -1).limit(5))
     
@@ -102,7 +131,16 @@ def dashboard():
 @app.route('/teachers')
 @login_required
 def show_teachers():
-    teachers = list(teachers_col.find())
+    teachers = list(teachers_col.aggregate([
+        {
+            '$lookup': {
+                'from': 'subjects',
+                'localField': 'subject_ids',
+                'foreignField': '_id',
+                'as': 'subjects'
+            }
+        }
+    ]))
     return render_template('teachers/list.html', teachers=teachers)
 
 @app.route('/teachers/add', methods=['GET', 'POST'])
@@ -111,35 +149,48 @@ def show_teachers():
 def add_teacher():
     if request.method == 'POST':
         try:
+            # Obtener y validar los IDs de materias
+            subject_ids = []
+            for subject_id in request.form.getlist('subjects'):
+                try:
+                    subject_ids.append(ObjectId(subject_id))
+                except:
+                    flash(f'ID de materia no válido: {subject_id}', 'danger')
+                    return redirect(url_for('add_teacher'))
+            
+            # Validar que las materias existan
+            for subject_id in subject_ids:
+                if not subjects_col.find_one({'_id': subject_id}):
+                    flash(f'Materia con ID {subject_id} no existe', 'danger')
+                    return redirect(url_for('add_teacher'))
+            
+            # Manejar la carga de archivos
             photo_filename = None
-            if 'photo' in request.files:
-                file = request.files['photo']
-                if file and allowed_file(file.filename):
-                    photo_filename = save_uploaded_file(file, app.config['UPLOAD_FOLDER'])
+            if 'photo' in request.files and request.files['photo'].filename != '':
+                photo_filename = save_uploaded_file(
+                    request.files['photo'], 
+                    app.config['UPLOAD_FOLDER']
+                )
             
             new_teacher = {
                 'name': request.form['name'],
                 'age': int(request.form['age']),
                 'email': request.form['email'],
-                'subjects': request.form.getlist('subjects'),
+                'subject_ids': subject_ids,
                 'titles': request.form.getlist('titles'),
                 'photo': photo_filename,
                 'created_at': datetime.now(),
                 'updated_at': datetime.now()
             }
             
-            result = teachers_col.insert_one(new_teacher)
-            flash('Teacher added successfully!', 'success')
+            teachers_col.insert_one(new_teacher)
+            flash('Profesor agregado exitosamente!', 'success')
             return redirect(url_for('show_teachers'))
-        except DuplicateKeyError:
-            flash('A teacher with this email already exists!', 'danger')
         except Exception as e:
-            flash(f'Error adding teacher: {str(e)}', 'danger')
+            flash(f'Error agregando profesor: {str(e)}', 'danger')
     
-    # Get available subjects for the dropdown
-    subjects = list(subjects_col.find({}, {'name': 1, '_id': 0}))
-    subject_names = [subj['name'] for subj in subjects]
-    return render_template('teachers/add.html', subjects=subject_names)
+    subjects = list(subjects_col.find({}, {'name': 1}))
+    return render_template('teachers/add.html', subjects=subjects)
 
 @app.route('/teachers/edit/<teacher_id>', methods=['GET', 'POST'])
 @login_required
@@ -147,44 +198,55 @@ def add_teacher():
 def edit_teacher(teacher_id):
     teacher = teachers_col.find_one({'_id': ObjectId(teacher_id)})
     if not teacher:
-        flash('Teacher not found!', 'danger')
+        flash('Profesor no encontrado!', 'danger')
         return redirect(url_for('show_teachers'))
     
     if request.method == 'POST':
         try:
+            subject_ids = []
+            for subject_id in request.form.getlist('subjects'):
+                try:
+                    subject_ids.append(ObjectId(subject_id))
+                except:
+                    flash(f'ID de materia no válido: {subject_id}', 'danger')
+                    return redirect(url_for('edit_teacher', teacher_id=teacher_id))
+            
             update_data = {
                 'name': request.form['name'],
                 'age': int(request.form['age']),
                 'email': request.form['email'],
-                'subjects': request.form.getlist('subjects'),
+                'subject_ids': subject_ids,
                 'titles': request.form.getlist('titles'),
                 'updated_at': datetime.now()
             }
             
-            if 'photo' in request.files:
-                file = request.files['photo']
-                if file and allowed_file(file.filename):
-                    # Delete old photo if exists
-                    if teacher.get('photo'):
-                        old_photo_path = os.path.join(app.config['UPLOAD_FOLDER'], teacher['photo'])
-                        if os.path.exists(old_photo_path):
-                            os.remove(old_photo_path)
-                    # Save new photo
-                    update_data['photo'] = save_uploaded_file(file, app.config['UPLOAD_FOLDER'])
+            # Manejar la carga de archivos
+            if 'photo' in request.files and request.files['photo'].filename != '':
+                # Eliminar foto anterior si existe
+                if teacher.get('photo'):
+                    old_photo = os.path.join(app.config['UPLOAD_FOLDER'], teacher['photo'])
+                    if os.path.exists(old_photo):
+                        os.remove(old_photo)
+                
+                # Guardar nueva foto
+                update_data['photo'] = save_uploaded_file(
+                    request.files['photo'], 
+                    app.config['UPLOAD_FOLDER']
+                )
             
             teachers_col.update_one(
                 {'_id': ObjectId(teacher_id)},
                 {'$set': update_data}
             )
-            flash('Teacher updated successfully!', 'success')
+            flash('Profesor actualizado exitosamente!', 'success')
             return redirect(url_for('show_teachers'))
         except Exception as e:
-            flash(f'Error updating teacher: {str(e)}', 'danger')
+            flash(f'Error actualizando profesor: {str(e)}', 'danger')
     
-    # Get available subjects for the dropdown
-    subjects = list(subjects_col.find({}, {'name': 1, '_id': 0}))
-    subject_names = [subj['name'] for subj in subjects]
-    return render_template('teachers/edit.html', teacher=teacher, subjects=subject_names)
+    subjects = list(subjects_col.find({}, {'name': 1}))
+    return render_template('teachers/edit.html',
+                         teacher=teacher,
+                         subjects=subjects)
 
 @app.route('/teachers/delete/<teacher_id>')
 @login_required

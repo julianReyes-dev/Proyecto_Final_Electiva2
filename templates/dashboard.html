@@ -73,7 +73,7 @@
                             <small>{{ teacher.created_at.strftime('%d/%m/%Y') }}</small>
                         </div>
                         <p class="mb-1">{{ teacher.email }}</p>
-                        <small>{{ teacher.subjects|length }} materias</small>
+                        <small>{{ teacher.subject_count }} materia{% if teacher.subject_count != 1 %}s{% endif %}</small>
                     </a>
                     {% else %}
                     <div class="alert alert-info mb-0">No hay profesores registrados</div>

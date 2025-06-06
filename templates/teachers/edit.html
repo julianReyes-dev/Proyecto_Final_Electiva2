@@ -47,17 +47,14 @@
                         </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label class="form-label">Materias que imparte</label>
-                        <select class="form-select" multiple name="subjects">
-                            {% for subject in subjects %}
-                            <option value="{{ subject }}" 
-                                    {% if subject in teacher.subjects %}selected{% endif %}>
-                                {{ subject }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                    <select class="form-select" multiple name="subjects">
+                        {% for subject in subjects %}
+                        <option value="{{ subject._id|string }}"
+                                {% if subject._id in teacher.subject_ids %}selected{% endif %}>
+                            {{ subject.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
                     
                     <div class="mb-3">
                         <label class="form-label">Títulos académicos</label>

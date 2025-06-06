@@ -1,9 +1,23 @@
 // Función para confirmar eliminación
-function confirmDelete(url, message = '¿Estás seguro de realizar esta acción?') {
+function confirmDelete(url, message = '¿Estás seguro de que deseas eliminar este elemento?') {
     if (confirm(message)) {
         window.location.href = url;
     }
+    return false;
 }
+
+// Asignar eventos a todos los botones de eliminar
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-confirm-delete]').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = this.getAttribute('data-delete-url');
+            const message = this.getAttribute('data-confirm-message') || 
+                          '¿Estás seguro de que deseas eliminar este elemento?';
+            confirmDelete(url, message);
+        });
+    });
+});
 
 // Preview de imagen antes de subir
 document.addEventListener('DOMContentLoaded', function() {

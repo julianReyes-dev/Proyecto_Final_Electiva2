@@ -334,3 +334,9 @@ Universidad Pedagógica y Tecnológica de Colombia — UPTC
 ---
 
 > Proyecto desarrollado para la asignatura **Electiva II** · Semestre 2025-1 · UPTC Tunja
+
+---
+ 
+## Licencia
+
+Este proyecto se distribuye bajo la **Licencia MIT**. Consulta el archivo [LICENSE](LICENSE) para más detalles.
